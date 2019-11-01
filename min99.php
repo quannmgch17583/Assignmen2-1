@@ -6,6 +6,7 @@
 
 <?php
 echo "Show all rows from Postgres Database";
+
 //Refere to database
 $db = parse_url(getenv("DATABASE_URL"));
 $pdo = new PDO("pgsql:" . sprintf(
@@ -17,13 +18,13 @@ $pdo = new PDO("pgsql:" . sprintf(
     ltrim($db["path"], "/")
 ));
 	//you sql query
-	$sql = "SELECT  productid, productname, price FROM Product";
+	$sql = "SELECT  productid, productname, price FROM product";
 	$stmt = $pdo->prepare($sql);
 	//execute the query on the server and return the result set
 	$stmt->setFetchMode(PDO::FETCH_ASSOC);
 	$stmt->execute();
 	$resultSet = $stmt->fetchAll();
-	//desplay the data
+	//display the data
 ?> 
 	<ul>
 		<?php
