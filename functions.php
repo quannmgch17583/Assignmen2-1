@@ -1,9 +1,9 @@
 <?php
-$dbhost = "localhost";
-$dbport = 3306;
-$dbuser = "root";
-$dbpassword = "";
-$dbname = "final"; //
+$dbhost = "ec2-174-129-253-62.compute-1.amazonaws.com";
+$dbport = 5432;
+$dbuser = "tdylryslfgqiwa";
+$dbpassword = "07c735ad2a5754f13d2ef6a2c96900527a6693ac87d2d412ad436a43b44b0792";
+$dbname = "dclu7v4hmgtt67"; //
 $salt1 = "qm&h*";
 $salt2 = "!@#$%";
 //Connect to the DB
