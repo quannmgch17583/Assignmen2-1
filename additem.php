@@ -1,74 +1,78 @@
 <?php
 require_once 'header.php';
-require_once 'restrictedsession.php';
+
 //getting the data
-$error = $msg = "";
-if (isset($_POST['add'])) { //adding
-    $iId = sanitizeString($_POST['iId']);
-    $iName = sanitizeString($_POST['iName']);
-    $iDescription = sanitizeString($_POST['iDescription']);
-    $iPrice = sanitizeString($_POST['iPrice']);
-    $iStatus = sanitizeString($_POST['iStatus']);
-    $iSize = sanitizeString($_POST['iSize']);    
-    $sImage = "";
+
+if (isset($_POST['iid'],$_POST['iname'],$_POST['idescription'],$_POST['iprice'],$_POST['istatus'],$_POST['isize'],  $_POST['cid'])) { //adding
+    $iId = $_POST['iid'];
+    $iImage = "";
     $extension = "";
     //Process the uploaded image
-    if (isset($_FILES['iImage']) && $_FILES['iImage']['size'] != 0) {
-        $temp_name = $_FILES['iImage']['tmp_name'];
-        $name = $_FILES['iImage']['name'];
+    if (isset($_FILES['iimage']) && $_FILES['iimage']['size'] != 0) {
+        $temp_name = $_FILES['iimage']['tmp_name'];
+        $name = $_FILES['iimage']['name'];
         $parts = explode(".", $name);
         $lastIndex = count($parts) - 1;
         $extension = $parts[$lastIndex];
         $iImage = "$iId.$extension";
-        $destination = "./images/item/$iImage";
+        $destination = "./images/$iImage";
         //Move the file from temp loc => to our image folder
         move_uploaded_file($temp_name, $destination);
     }
-    $catalogueId = sanitizeString($_POST['catalogueId']);
-    //TODO: Do the PHP validation here to protect your server
-    //Add the student
-    $query = "INSERT INTO Item values ('$iId','$iName','$iDescription','$iPrice','$iStatus','$iSize','$iImage','$catalogueId')";
-    $result = queryMySql($query);
-    if (!$result) {
-        $error = $error . "<br>Can't add Item, please try again";
-    } else {
-        $msg = "Added $iName successfully!";
+   
+    $sql = "INSERT INTO item(iid,iname,idescription,iprice,istatus,isize,iimage,cid) values (:iid , :iname, :idescription, :iprice, :istatus, :isize, :iimage, :cid)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':cid', $_POST['cid'], PDO::PARAM_STR);
+    $stmt->bindValue(':iid', $_POST['iid'], PDO::PARAM_STR);
+    $stmt->bindValue(':iname', $_POST['iname'], PDO::PARAM_STR);
+    $stmt->bindValue(':idescription', $_POST['idescription'], PDO::PARAM_STR);
+    $stmt->bindValue(':iprice', $_POST['iprice'], PDO::PARAM_STR);
+    $stmt->bindValue(':istatus', $_POST['istatus'], PDO::PARAM_STR);
+    $stmt->bindValue(':isize', $_POST['isize'], PDO::PARAM_STR);
+    $stmt->bindValue(':iimage', $iImage, PDO::PARAM_STR);
+    $pdoExec = $stmt->execute();
+    
+        // check if mysql insert query successful
+    if($pdoExec)
+    {
+        echo 'Data Inserted';
+    }else{
+        echo 'Data Not Inserted';
     }
 }
 ?>
 <br><br>
-<form action="additem.php" method="POST" enctype="multipart/form-data">
+<form action="additem.php" method="post" enctype="multipart/form-data">
     <fieldset>
-        <div class="error"><?php echo $error; ?></div>
-        <div class="msg"><?php echo $msg; ?></div>
+       
         <legend>Add Item</legend>
         
         ID: <br>
-        <input type="number" name="iId" maxlength="15" placeholder="(number)"
+        <input type="text" name="iid" size="15" maxlength="15" placeholder="(any thing)"
                required /><br>
         Name: <br>
-        <input type="text" name="iName" maxlength="100" required/><br>
-        Desciption:<br>
-        <textarea maxlength="200" name="iDescription"></textarea><br>
+        <input type="text" name="iname" maxlength="100" required/><br>
+        Description:<br>
+        <textarea maxlength="500" name="idescription"></textarea><br>
         Price:<br>
-        <input type="number" name="iPrice" maxlength="20"/><br>
-        Status:<br><select name="iStatus">
-            <option value="Out of orders">Out of orders</option>
-            <option value="Available">Available</option>
-        </select>
-        <br>
+        <input type="number" name="iprice" maxlength="20"/><br>
+        Status:<br>
+        <input type="text" name="istatus" maxlength="30"/><br>
         Size:<br>
-        <input type="text" name="iSize" maxlength="15"/><br>     
+        <input type="text" name="isize" maxlength="15"/><br>     
         Image:<br>
-        <input type="file" name="iImage"/><br>
+        <input type="file" name="iimage"/><br>
         Catalogue:<br>
-        <select name="catalogueId">
+        <select name="cid">
             <?php
-            $query = "SELECT cId, cName FROM catalogue";
-            $batches = queryMysql($query);
-            while ($batch = mysqli_fetch_array($batches)) {
-                $cId = $batch[0];
-                $cName = $batch[1];
+            $query = "SELECT cid, cname FROM catalogue";
+            $result = queryMysql($query);
+            $result->setFetchMode(PDO::FETCH_ASSOC);
+            $result->execute();
+            $resultSet = $result->fetchAll();
+           foreach ($resultSet as $row) {
+                $cId = $row['cid'];
+                $cName = $row['cname'];
                 echo "<option value='$cId'>$cName</option>";
             }
             ?>

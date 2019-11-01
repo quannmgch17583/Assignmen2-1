@@ -1,38 +1,41 @@
 <?php
 require_once './header.php';
 //Check to make sure that user is logged in first
-require_once './restrictedsession.php';
+
 $error = $msg = "";
-if (isset($_POST['iName'])) { //updating
-    $iId = sanitizeString($_POST['iId']);
-    $iName = sanitizeString($_POST['iName']);
-    $iDescription = sanitizeString($_POST['iDescription']);
-    $iPrice = sanitizeString($_POST['iPrice']);
-    $iStatus = sanitizeString($_POST['iStatus']);
-    $iSize = sanitizeString($_POST['iSize']);
-    $catalogueId = sanitizeString($_POST['catalogueId']);
-    $uId = $_SESSION['uId'];
-    $query = "UPDATE Item SET iName = '$iName', iDescription = '$iDescription', iPrice = '$iPrice', iStatus = '$iStatus', iSize = '$iSize' WHERE iId = '$iId'";
-    $result = queryMysql($query);
-    if (!$result) {
-        $error = "Couldn't update item $iName, please try again";
-    } else {
-        $msg = "Updated $iName successfully";
+if (isset($_POST['iname'],$_POST['idescription'],$_POST['iprice'],$_POST['istatus'],$_POST['isize'])) { //updating
+    $iId = $_POST['iid'];
+    $sql = "UPDATE Item SET iname = :iname, idescription = :idescription, iprice = :iprice, istatus = :istatus, isize = :isize WHERE iid = '$iId'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':iname', $_POST['iname'], PDO::PARAM_STR);
+    $stmt->bindValue(':idescription', $_POST['idescription'], PDO::PARAM_STR);
+    $stmt->bindValue(':iprice', $_POST['iprice'], PDO::PARAM_STR);
+    $stmt->bindValue(':istatus', $_POST['istatus'], PDO::PARAM_STR);
+    $stmt->bindValue(':isize', $_POST['isize'], PDO::PARAM_STR);
+    $pdoExec = $stmt->execute();
+    
+        // check if mysql insert query successful
+    if($pdoExec)
+    {
+        echo 'Data Inserted';
+    }else{
+        echo 'Data Not Inserted';
     }
+    
 }
 //for loading the data to the form
-if (isset($_POST['iId'])) {
-    $iId = sanitizeString($_POST['iId']);
+if (isset($_POST['iid'])) {
+    $iId = $_POST['iid'];
     //Load the current data to that batch
-    $query = "SELECT iName, iDescription, iPrice, iStatus, iSize FROM Item WHERE iId = '$iId'";
+    $query = "SELECT iname, idescription, iprice, istatus, isize FROM item WHERE iid = '$iId'";
     $result = queryMysql($query);
     $row = mysqli_fetch_array($result);
     if ($row) {
-        $iName = $row[0];
-        $iDescription = $row[1];
-        $iPrice = $row[2];
-        $iStatus = $row[3];
-        $iSize = $row[4];
+        $iName = $row['iname'];
+        $iDescription = $row['idescription'];
+        $iPrice = $row['iprice'];
+        $iStatus = $row['istatus'];
+        $iSize = $row['isize'];
     }
 }
 ?>
@@ -40,23 +43,18 @@ if (isset($_POST['iId'])) {
 <form action="updateitem.php" method="POST">
     <fieldset>
         <legend>Update Item</legend>
-        <div class="error"><?php echo $error; ?></div>
-        <input type="hidden" value="<?php echo $iId; ?>" name="iId"/>
+        <input type="hidden" value="<?php echo $iId; ?>" name="iid"/>
         Name: </br>
-        <input type="text" id="iName" name="iName" required value="<?php echo $iName; ?>"/><br>
+        <input type="text" id="iName" name="iname" required value="<?php echo $iName; ?>"/><br>
         Description: </br>
-        <input type="text" id="iDescription" name="iDescription" required value="<?php echo $iDescription; ?>"/><br>
+        <input type="text" id="iDescription" name="idescription" required value="<?php echo $iDescription; ?>"/><br>
         Price: </br>
-        <input type="text"  name="iPrice" required value="<?php echo $iPrice; ?>"/><br>
-        Status:<br><select name="iStatus">
-            <option value="Out of orders">Out of orders</option>
-            <option value="Available">Available</option>
-        </select>
-        <br>
+        <input type="text"  name="iprice" required value="<?php echo $iPrice; ?>"/><br>
+        Status: </br>
+        <input type="text"  name="istatus" required value="<?php echo $iStatus; ?>"/><br>
         Size: </br>
-        <input type="text"  name="iSize" required value="<?php echo $iSize; ?>"/><br><br>
+        <input type="text"  name="isize" required value="<?php echo $iSize; ?>"/><br><br>
         <input type="submit" value="Update"/>
-        <div><?php echo $msg; ?></div>
     </fieldset>
 </form>
 </body>
