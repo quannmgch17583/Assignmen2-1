@@ -18,7 +18,7 @@ $pdo = new PDO("pgsql:" . sprintf(
     ltrim($db["path"], "/")
 ));
 	//you sql query
-	$sql = "SELECT  productid, productname, price FROM product";
+	$sql = "SELECT productname, price FROM product";
 	$stmt = $pdo->prepare($sql);
 	//execute the query on the server and return the result set
 	$stmt->setFetchMode(PDO::FETCH_ASSOC);
